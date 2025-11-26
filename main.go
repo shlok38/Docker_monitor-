@@ -63,7 +63,7 @@ func (m *Monitor) GetContainerStats() ([]ContainerStats, error) {
 		if len(ctr.Names) > 0 {
 			containerName = ctr.Names[0]
 		}
-		
+
 		stat, err := m.getContainerStat(ctr.ID, containerName)
 		if err != nil {
 			log.Printf("Warning: failed to get stats for container %s: %v", ctr.ID[:12], err)

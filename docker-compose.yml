@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  docker-monitor:
+    build: .
+    container_name: docker-monitor
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount Docker socket to access Docker API
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    environment:
+      - TZ=UTC

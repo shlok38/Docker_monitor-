@@ -29,6 +29,29 @@ cd Docker_monitor-
 go build -o docker-monitor
 ```
 
+### Using Docker
+
+```bash
+# Build the Docker image
+docker build -t docker-monitor .
+
+# Run the container
+docker run -d \
+  --name docker-monitor \
+  -p 8080:8080 \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  docker-monitor
+```
+
+### Using Docker Compose
+
+```bash
+# Clone and start
+git clone https://github.com/shlok38/Docker_monitor-.git
+cd Docker_monitor-
+docker-compose up -d
+```
+
 ### Direct Run
 
 ```bash
@@ -167,6 +190,35 @@ curl -s http://localhost:8080/api/stats | \
 
 ### Performance Tracking
 Use in CI/CD pipelines to track container resource usage during tests.
+
+### Integration with Docker Compose
+Create a monitoring service in your docker-compose.yml:
+```yaml
+version: '3.8'
+services:
+  monitor:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["-api", "-port", "8080"]
+```
+
+Create a simple Dockerfile:
+```dockerfile
+FROM golang:1.24-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o docker-monitor
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app/docker-monitor .
+EXPOSE 8080
+ENTRYPOINT ["./docker-monitor"]
+```
 
 ## Development
 

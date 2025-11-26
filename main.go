@@ -58,7 +58,13 @@ func (m *Monitor) GetContainerStats() ([]ContainerStats, error) {
 
 	var stats []ContainerStats
 	for _, ctr := range containers {
-		stat, err := m.getContainerStat(ctr.ID, ctr.Names[0])
+		// Get container name
+		containerName := ctr.ID[:12] // Use ID as fallback
+		if len(ctr.Names) > 0 {
+			containerName = ctr.Names[0]
+		}
+		
+		stat, err := m.getContainerStat(ctr.ID, containerName)
 		if err != nil {
 			log.Printf("Warning: failed to get stats for container %s: %v", ctr.ID[:12], err)
 			continue
@@ -86,7 +92,10 @@ func (m *Monitor) getContainerStat(containerID, containerName string) (Container
 	cpuPercent := calculateCPUPercent(&v)
 
 	// Calculate memory percentage
-	memPercent := float64(v.MemoryStats.Usage) / float64(v.MemoryStats.Limit) * 100.0
+	var memPercent float64
+	if v.MemoryStats.Limit > 0 {
+		memPercent = float64(v.MemoryStats.Usage) / float64(v.MemoryStats.Limit) * 100.0
+	}
 
 	// Calculate network stats
 	var rxBytes, txBytes uint64
@@ -105,8 +114,14 @@ func (m *Monitor) getContainerStat(containerID, containerName string) (Container
 		}
 	}
 
+	// Safely truncate container ID
+	displayID := containerID
+	if len(containerID) > 12 {
+		displayID = containerID[:12]
+	}
+
 	return ContainerStats{
-		ID:            containerID[:12],
+		ID:            displayID,
 		Name:          containerName,
 		CPUPercent:    cpuPercent,
 		MemoryUsage:   v.MemoryStats.Usage,

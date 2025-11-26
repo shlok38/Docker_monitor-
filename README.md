@@ -15,7 +15,7 @@ A powerful Docker Container Monitoring Tool built with Go. Shows real-time CPU, 
 
 ## Prerequisites
 
-- Go 1.21 or higher
+- Go 1.24 or higher
 - Docker Engine installed and running
 - Access to Docker socket (typically requires running as root or being in the docker group)
 
